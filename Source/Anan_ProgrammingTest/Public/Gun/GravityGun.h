@@ -12,13 +12,13 @@ class ANAN_PROGRAMMINGTEST_API AGravityGun : public AActor, public IInteractionI
 {
 	GENERATED_BODY()
 
-	/** Max Distance that we can grab the objects from using this Gun*/
+	/** Max Distance that we can pickup the objects from using this Gun*/
 	UPROPERTY(EditAnywhere, Category = "Initialize Variable", meta = (AllowPrivateAccess = "true"))
-	float GrabDistance = 1000;
+	float PickUpDistance = 1000;
 
 	/** Offset to hold the physics object infront*/
 	UPROPERTY(EditAnywhere, Category = "Initialize Variable", meta = (AllowPrivateAccess = "true"))
-	float GrabOffsetDistance = 300;
+	float HoldOffset = 300;
 
 	/** ThrowForce when grabbing an object*/
 	UPROPERTY(EditAnywhere, Category = "Initialize Variable", meta = (AllowPrivateAccess = "true"))
@@ -43,6 +43,14 @@ class ANAN_PROGRAMMINGTEST_API AGravityGun : public AActor, public IInteractionI
 	/** Shoot Input Action*/
 	UPROPERTY(EditAnywhere, Category = "Initialize Variable|Input", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* ShootInputAction;
+
+	//InteractionMessage Widget 
+	UPROPERTY(EditAnywhere, Category = "Initialize Variable|Widget", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> GravityGunTutorialWidgetClass;
+
+	//Fire Animation Montage for the Player
+	UPROPERTY(EditAnywhere, Category = "Initialize Variable", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* FireMontage;
 
 
 public:	

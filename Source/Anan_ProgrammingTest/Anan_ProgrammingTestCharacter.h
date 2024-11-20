@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "AbilitySystemInterface.h"
 #include "Anan_ProgrammingTestCharacter.generated.h"
 
 class UInputComponent;
@@ -17,7 +18,7 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AAnan_ProgrammingTestCharacter : public ACharacter
+class AAnan_ProgrammingTestCharacter : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -45,6 +46,13 @@ class AAnan_ProgrammingTestCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	/** Provide all the Default Gameplay Abilities in this array*/
+	UPROPERTY(EditDefaultsOnly, Category = "AbilitySystemComponent|GameplayAbilities", meta = (AllowPrivateAccess = "true"))
+	TArray<TSubclassOf<class UGameplayAbility>> StartingGameplayAbilities;
+
+	/** Ability System Interface Function
+		Returns Ability System Component of this Actor */
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const;
 	
 public:
 	AAnan_ProgrammingTestCharacter();
@@ -57,10 +65,15 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 protected:
+	
 	// APawn interface
 	virtual void NotifyControllerChanged() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
+
+	/** Ability System Component*/
+	UPROPERTY(EditDefaultsOnly)
+	class UAbilitySystemComponent* AbilitySystemComponent;
 
 public:
 	/** Returns Mesh1P subobject **/
@@ -72,9 +85,12 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Animation Values")
 	bool HasRifle = false;
 
-
 	/** Interaction Component which takes care of Look At and Interact Functions*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AdditionalComponents)
 	class UInteractionComponent* InteractionComponent;
+
+	/** Base Attribute Set stores the Stats of the Player*/
+	UPROPERTY(BlueprintReadOnly, Category = "AbilitySystemComponent|AttributeSet")
+	const class UBaseAttributeSet* PlayerAttributeSet;
 };
 

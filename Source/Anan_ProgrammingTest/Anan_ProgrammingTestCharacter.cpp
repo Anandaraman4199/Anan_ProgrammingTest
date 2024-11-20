@@ -11,12 +11,20 @@
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
 #include "Component/InteractionComponent.h"
+#include "AbilitySystemComponent.h"
+#include "AttributeSet/BaseAttributeSet.h"
+#include "GameplayAbilities/DashAbility.h"
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
 // AAnan_ProgrammingTestCharacter
+
+UAbilitySystemComponent* AAnan_ProgrammingTestCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
 
 AAnan_ProgrammingTestCharacter::AAnan_ProgrammingTestCharacter()
 {
@@ -37,9 +45,11 @@ AAnan_ProgrammingTestCharacter::AAnan_ProgrammingTestCharacter()
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
-	// Create a InteractionComponent
+	// Create an InteractionComponent
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 
+	// Create an Ability System Component
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -54,6 +64,23 @@ void AAnan_ProgrammingTestCharacter::NotifyControllerChanged()
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+
+	// Add a new base attribute set to the Ability System Component, if there isn't one
+	if (AbilitySystemComponent)
+	{
+		PlayerAttributeSet = AbilitySystemComponent->GetSet<UBaseAttributeSet>();
+		
+		if (!PlayerAttributeSet)
+		{
+			PlayerAttributeSet = AbilitySystemComponent->AddSet<UBaseAttributeSet>();
+		}
+
+		// Giving All Gameplay Abilities stored in the "StartingGameplayAbilities" Array to the Player
+		for (int i = 0; i < StartingGameplayAbilities.Num(); i++)
+		{
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartingGameplayAbilities[i]));
 		}
 	}
 }
@@ -90,6 +117,7 @@ void AAnan_ProgrammingTestCharacter::Move(const FInputActionValue& Value)
 		// add movement 
 		AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 		AddMovementInput(GetActorRightVector(), MovementVector.X);
+
 	}
 }
 

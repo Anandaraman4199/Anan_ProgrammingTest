@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Blueprint/UserWidget.h"
 
 
 // Sets default values
@@ -73,6 +74,9 @@ void AGravityGun::Interact_Implementation()
 		EnhancedInputComponent->BindAction(ShootInputAction, ETriggerEvent::Triggered, this, &AGravityGun::Throw);
 		EnhancedInputComponent->BindAction(GrabInputAction, ETriggerEvent::Completed, this, &AGravityGun::GrabRelease);
 	}
+
+	UUserWidget* TutorialWidget = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), GravityGunTutorialWidgetClass);
+	TutorialWidget->AddToViewport(1);
 }
 
 // Called every frame
@@ -95,7 +99,7 @@ void AGravityGun::Grab()
 
 	FHitResult OutHit;
 	FVector StartLocation = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation();
-	FVector EndLocation = StartLocation + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector() * GrabDistance);
+	FVector EndLocation = StartLocation + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector() * PickUpDistance);
 	FCollisionQueryParams CollisionQueryParams = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetComponentByClass<UInteractionComponent>()->TraceCollisionParams;
 
 	// Line Trace
@@ -152,6 +156,13 @@ void AGravityGun::Throw()
 	{
 		Shoot();
 	}
+
+	// Plays Fire Animation Montage for the Player Mesh
+	if (FireMontage)
+	{
+		Cast<AAnan_ProgrammingTestCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0))->GetMesh1P()->GetAnimInstance()->Montage_Play(FireMontage);
+	}
+
 }
 
 
@@ -164,8 +175,8 @@ void AGravityGun::Shoot()
 	ObjectTypes.AddUnique(ObjectType);
 	TArray<FHitResult> HitResults;
 
-	if (UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), StartLocation, StartLocation, GrabDistance,
-		ObjectTypes, true, TArray<AActor*>(), EDrawDebugTrace::None, HitResults, false))
+	if (UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), StartLocation, StartLocation, PickUpDistance,
+		ObjectTypes, false, TArray<AActor*>(), EDrawDebugTrace::None, HitResults, false))
 	{
 		// Find what are the objects are infront of the player using dot product
 		for (int i = 0; i < HitResults.Num(); i++)
@@ -192,7 +203,7 @@ void AGravityGun::Shoot()
 // Set the Physics Handle Target Location and Rotation
 void AGravityGun::SetTargetLocationAndRotation()
 {
-	FVector TargetLocation = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation() + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector() * GrabOffsetDistance);
+	FVector TargetLocation = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraLocation() + (UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector() * HoldOffset);
 	PhysicsHandleComponent->SetTargetLocationAndRotation(TargetLocation, UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetCameraRotation());
 }
 
