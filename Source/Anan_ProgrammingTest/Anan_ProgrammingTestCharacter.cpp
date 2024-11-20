@@ -12,6 +12,7 @@
 #include "Engine/LocalPlayer.h"
 #include "Component/InteractionComponent.h"
 
+
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////

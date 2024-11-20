@@ -34,6 +34,8 @@ void UInteractionComponent::BeginPlay()
 	PlayerController = Cast<APlayerController>(Character->GetController());
 	PlayerCamera = GetOwner()->GetComponentByClass<UCameraComponent>();
 	
+	TraceCollisionParams.AddIgnoredActor(Character);
+
 	if (InteractionWidgetClass)
 	{ 
 		InteractionWidget = CreateWidget<UInteractionMessageWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), InteractionWidgetClass);
@@ -58,17 +60,16 @@ void UInteractionComponent::LookAt()
 	FHitResult OutHit;
 	FVector StartLocation = PlayerCamera->GetComponentLocation();
 	FVector EndLocation = StartLocation + (PlayerCamera->GetForwardVector() * LineTraceDistance);
-	FCollisionQueryParams CollisionQueryParams;
-	CollisionQueryParams.AddIgnoredActor(Character);
 	bool CanInteract = false;
 	FText WidgetMessage;
 
 	//Line Trace and check the Hit Actor has Interaction Interface
-	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Camera, CollisionQueryParams))
+	if (GetWorld()->LineTraceSingleByChannel(OutHit, StartLocation, EndLocation, ECC_Camera, TraceCollisionParams))
 	{
 		if (OutHit.GetActor()->Implements<UInteractionInterface>())
 		{
 			IInteractionInterface::Execute_LookAt(OutHit.GetActor(), CanInteract, WidgetMessage);
+
 		}
 		
 	}
@@ -78,22 +79,39 @@ void UInteractionComponent::LookAt()
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent);
 
-	LookAtActor = (CanInteract) ? OutHit.GetActor() : nullptr;
-
-	if (CanInteract)
+	if (CanInteract ^ OnInteraction)
 	{
-		Subsystem->AddMappingContext(InteractionMappingContext, 1);
-		
-		// Interaction Action Binding
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &UInteractionComponent::Interact);
+		if (CanInteract)
+		{
+			Subsystem->AddMappingContext(InteractionMappingContext, 1);
 
-		InteractionWidget->ShowInteractionMessage(WidgetMessage);
+			// Interaction Action Binding
+
+			EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &UInteractionComponent::Interact);
+
+			InteractionWidget->ShowInteractionMessage(WidgetMessage);
+
+			LookAtActor = OutHit.GetActor();
+
+			OnInteraction = true;
+
+		}
+		else
+		{
+			Subsystem->RemoveMappingContext(InteractionMappingContext);
+
+			EnhancedInputComponent->ClearBindingsForObject(this);
+
+			InteractionWidget->HideInteractionMessage();
+
+			LookAtActor = nullptr;
+
+			OnInteraction = false;
+
+		}
 	}
-	else
-	{
-		Subsystem->RemoveMappingContext(InteractionMappingContext);
-		InteractionWidget->HideInteractionMessage();
-	}
+
+	
 }
 
 void UInteractionComponent::Interact()

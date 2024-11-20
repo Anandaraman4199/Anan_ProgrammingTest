@@ -44,6 +44,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "InitializeComponent|Widget")
 	TSubclassOf<class UInteractionMessageWidget> InteractionWidgetClass;
 
+	// Trace Collision Query Params
+	FCollisionQueryParams TraceCollisionParams;
+
 private:
 	// LookAt Function will find what is infront of the player and stores the actor in LookAtActor Variable. This will be called in Tick.
 	void LookAt();
@@ -62,5 +65,8 @@ private:
 
 	//Hold Interaction Message Widget after creating it
 	UInteractionMessageWidget* InteractionWidget;
+
+	// To check whether we already in Interaction
+	bool OnInteraction = false;
 
 };

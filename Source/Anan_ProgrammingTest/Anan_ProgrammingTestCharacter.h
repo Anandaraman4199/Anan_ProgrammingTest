@@ -29,10 +29,6 @@ class AAnan_ProgrammingTestCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCameraComponent;
 
-	/** Interaction Component which takes care of Look At and Interact Functions*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AdditionalComponents, meta = (AllowPrivateAccess = "true"))
-	class UInteractionComponent* InteractionComponent;
-
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -48,7 +44,6 @@ class AAnan_ProgrammingTestCharacter : public ACharacter
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
-
 
 	
 public:
@@ -76,5 +71,10 @@ public:
 	/** This will be used for Animation Blueprint*/
 	UPROPERTY(BlueprintReadOnly, Category = "Animation Values")
 	bool HasRifle = false;
+
+
+	/** Interaction Component which takes care of Look At and Interact Functions*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AdditionalComponents)
+	class UInteractionComponent* InteractionComponent;
 };
 
