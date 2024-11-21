@@ -15,7 +15,6 @@
 #include "AttributeSet/BaseAttributeSet.h"
 #include "GameplayAbilities/DashAbility.h"
 
-
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
@@ -99,6 +98,9 @@ void AAnan_ProgrammingTestCharacter::SetupPlayerInputComponent(UInputComponent* 
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AAnan_ProgrammingTestCharacter::Look);
+		
+		//Dashing
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &AAnan_ProgrammingTestCharacter::Dash);
 	}
 	else
 	{
@@ -132,4 +134,10 @@ void AAnan_ProgrammingTestCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AAnan_ProgrammingTestCharacter::Dash()
+{
+	// Try Activate Dash Ability
+	AbilitySystemComponent->TryActivateAbilityByClass(UDashAbility::StaticClass());
 }

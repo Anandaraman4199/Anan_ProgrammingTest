@@ -46,6 +46,10 @@ class AAnan_ProgrammingTestCharacter : public ACharacter, public IAbilitySystemI
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
+	/** Dash Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* DashAction;
+
 	/** Provide all the Default Gameplay Abilities in this array*/
 	UPROPERTY(EditDefaultsOnly, Category = "AbilitySystemComponent|GameplayAbilities", meta = (AllowPrivateAccess = "true"))
 	TArray<TSubclassOf<class UGameplayAbility>> StartingGameplayAbilities;
@@ -63,6 +67,9 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	/** Called for Dash input */
+	void Dash();
 
 protected:
 	
