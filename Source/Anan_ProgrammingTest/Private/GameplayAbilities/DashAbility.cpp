@@ -2,22 +2,45 @@
 
 
 #include "GameplayAbilities/DashAbility.h"
-#include "AbilityTasks/MoveCharacterAbilityTask.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Anan_ProgrammingTest/Anan_ProgrammingTestCharacter.h"
 
-void UDashAbility::OnTaskCompleted(bool IsCancelled)
+UDashAbility::UDashAbility(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Dash Completed"));
-	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, false);
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 }
 
 void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 
-	UE_LOG(LogTemp, Warning, TEXT("Dash Started"));
+	//Set Dash Cooldown class from Player Character
 
-	FVector TargetLocation = GetAvatarActorFromActorInfo()->GetActorLocation() + GetAvatarActorFromActorInfo()->GetActorForwardVector() * 500;
-	UMoveCharacterAbilityTask* Task = UMoveCharacterAbilityTask::MoveCharacter(this, GetAvatarActorFromActorInfo(), TargetLocation , 500);
-	Task->OnCompleted.AddDynamic(this, &UDashAbility::OnTaskCompleted);
-	Task->ReadyForActivation();
+	AAnan_ProgrammingTestCharacter* Player = Cast<AAnan_ProgrammingTestCharacter>(GetAvatarActorFromActorInfo());
+
+	CooldownGameplayEffectClass = Player->DashCooldownClass;
+
+
+	// Check are we already on a Cooldown
+
+	if (!CommitAbilityCooldown(Handle, ActorInfo, ActivationInfo, false))
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, false, true);
+		return;
+	}
+
+
+	//Get Player Input Values from the Player Character and Calculate the direction and apply it to the Velocity of Character Movement Component
+
+	UCharacterMovementComponent* PlayerCharacterMovement = GetAvatarActorFromActorInfo()->GetComponentByClass<UCharacterMovementComponent>();
 	
+	FVector2D InputValues = Player->PlayerMoveInputValues;
+
+	FVector Direction = GetAvatarActorFromActorInfo()->GetActorForwardVector() * InputValues.Y +GetAvatarActorFromActorInfo()->GetActorRightVector() * InputValues.X;
+
+	Direction.Normalize();
+
+	PlayerCharacterMovement->Velocity = Direction * Player->DashSpeed;
+
+	EndAbility(Handle, ActorInfo, ActivationInfo, false, false);
+
 }

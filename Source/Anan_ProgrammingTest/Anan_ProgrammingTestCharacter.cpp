@@ -108,11 +108,11 @@ void AAnan_ProgrammingTestCharacter::SetupPlayerInputComponent(UInputComponent* 
 	}
 }
 
-
 void AAnan_ProgrammingTestCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
+	PlayerMoveInputValues = MovementVector;
 
 	if (Controller != nullptr)
 	{

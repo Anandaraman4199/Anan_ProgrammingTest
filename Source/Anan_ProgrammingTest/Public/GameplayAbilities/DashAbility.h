@@ -16,8 +16,7 @@ class ANAN_PROGRAMMINGTEST_API UDashAbility : public UGameplayAbility
 
 protected:
 
-	UFUNCTION()
-	void OnTaskCompleted(bool IsCancelled);
+	UDashAbility(const FObjectInitializer& ObjectInitializer);
 
 	void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	

@@ -57,7 +57,7 @@ class AAnan_ProgrammingTestCharacter : public ACharacter, public IAbilitySystemI
 	/** Ability System Interface Function
 		Returns Ability System Component of this Actor */
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const;
-	
+
 public:
 	AAnan_ProgrammingTestCharacter();
 
@@ -99,5 +99,17 @@ public:
 	/** Base Attribute Set stores the Stats of the Player*/
 	UPROPERTY(BlueprintReadOnly, Category = "AbilitySystemComponent|AttributeSet")
 	const class UBaseAttributeSet* PlayerAttributeSet;
+
+	/** Store Player Move Input Values*/
+	UPROPERTY(BlueprintReadOnly, Category = "InputValues")
+	FVector2D PlayerMoveInputValues;
+
+	/** Dash Speed*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+	float DashSpeed = 10000;
+
+	/** Cooldown between dashes in seconds*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+	TSubclassOf<class UGameplayEffect> DashCooldownClass;
 };
 
