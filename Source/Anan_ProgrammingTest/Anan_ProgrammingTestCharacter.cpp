@@ -14,6 +14,7 @@
 #include "AbilitySystemComponent.h"
 #include "AttributeSet/BaseAttributeSet.h"
 #include "GameplayAbilities/DashAbility.h"
+#include "GameplayAbilities/ThrowGameplayAbility.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -101,6 +102,9 @@ void AAnan_ProgrammingTestCharacter::SetupPlayerInputComponent(UInputComponent* 
 		
 		//Dashing
 		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &AAnan_ProgrammingTestCharacter::Dash);
+
+		//Molotov 
+		EnhancedInputComponent->BindAction(MolotovInputAction, ETriggerEvent::Triggered, this, &AAnan_ProgrammingTestCharacter::Molotov);
 	}
 	else
 	{
@@ -110,6 +114,7 @@ void AAnan_ProgrammingTestCharacter::SetupPlayerInputComponent(UInputComponent* 
 
 void AAnan_ProgrammingTestCharacter::Move(const FInputActionValue& Value)
 {
+
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	PlayerMoveInputValues = MovementVector;
@@ -141,3 +146,9 @@ void AAnan_ProgrammingTestCharacter::Dash()
 	// Try Activate Dash Ability
 	AbilitySystemComponent->TryActivateAbilityByClass(UDashAbility::StaticClass());
 }
+
+void AAnan_ProgrammingTestCharacter::Molotov()
+{
+	AbilitySystemComponent->TryActivateAbilityByClass(MolotovAbility.Get());
+}
+

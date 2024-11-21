@@ -22,6 +22,7 @@ class AAnan_ProgrammingTestCharacter : public ACharacter, public IAbilitySystemI
 {
 	GENERATED_BODY()
 
+
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Mesh, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* Mesh1P;
@@ -31,24 +32,34 @@ class AAnan_ProgrammingTestCharacter : public ACharacter, public IAbilitySystemI
 	UCameraComponent* FirstPersonCameraComponent;
 
 	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Default", meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
 
 	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category= "Input|Default", meta=(AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
 
 	/** Move Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category= "Input|Default", meta=(AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 
 	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Default", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 
 	/** Dash Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Input|Default", meta = (AllowPrivateAccess = "true"))
 	class UInputAction* DashAction;
+
+	/** Molotov ability*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwables|Molotov", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UThrowGameplayAbility> MolotovAbility;
+
+	/** Molotov Input Action*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwables|Molotov", meta = (AllowPrivateAccess = "true"))
+	UInputAction* MolotovInputAction;
+
+
 
 	/** Provide all the Default Gameplay Abilities in this array*/
 	UPROPERTY(EditDefaultsOnly, Category = "AbilitySystemComponent|GameplayAbilities", meta = (AllowPrivateAccess = "true"))
@@ -70,6 +81,9 @@ protected:
 
 	/** Called for Dash input */
 	void Dash();
+
+	/** Called when switching to Molotov input */
+	void Molotov();
 
 protected:
 	
@@ -111,5 +125,22 @@ public:
 	/** Cooldown between dashes in seconds*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
 	TSubclassOf<class UGameplayEffect> DashCooldownClass;
+
+	/** ThrowableMappingContext */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Throwable")
+	UInputMappingContext* ThrowableMappingContext;
+
+	/** Aim Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Throwable")
+	UInputAction* AimAction;
+
+	/** Throw Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input|Throwable")
+	UInputAction* ThrowAction;
+
+	/** Throwables items Throw Start Offset*/
+	UPROPERTY(EditDefaultsOnly, Category = "Throwables", meta = (AllowPrivateAccess = "true"))
+	FVector ThrowStartOffset;
+
 };
 

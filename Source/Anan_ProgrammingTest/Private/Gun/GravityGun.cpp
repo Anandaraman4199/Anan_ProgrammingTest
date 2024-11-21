@@ -70,7 +70,7 @@ void AGravityGun::Interact_Implementation()
 	}
 	if (EnhancedInputComponent)
 	{
-		EnhancedInputComponent->BindAction(GrabInputAction, ETriggerEvent::Triggered, this, &AGravityGun::Grab);
+		EnhancedInputComponent->BindAction(GrabInputAction, ETriggerEvent::Started, this, &AGravityGun::Grab);
 		EnhancedInputComponent->BindAction(ShootInputAction, ETriggerEvent::Triggered, this, &AGravityGun::Throw);
 		EnhancedInputComponent->BindAction(GrabInputAction, ETriggerEvent::Completed, this, &AGravityGun::GrabRelease);
 	}
