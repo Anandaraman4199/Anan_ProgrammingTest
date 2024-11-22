@@ -25,4 +25,8 @@ class ANAN_PROGRAMMINGTEST_API UBaseAttributeSet : public UAttributeSet
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ACCESSORS(UBaseAttributeSet, Health)
 
+	UPROPERTY(BlueprintReadOnly, Category = "MaxHealth", meta = (AllowPrivateAccess = "true"))
+	FGameplayAttributeData MaxHealth;
+	ATTRIBUTE_ACCESSORS(UBaseAttributeSet, MaxHealth)
+
 };

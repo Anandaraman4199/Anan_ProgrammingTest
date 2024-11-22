@@ -25,6 +25,10 @@ class ANAN_PROGRAMMINGTEST_API UThrowGameplayAbility : public UGameplayAbility
 
 protected:
 
+	/** Weapon Name */
+	UPROPERTY(EditDefaultsOnly)
+	FString WeaponName;
+
 	 /** Specify the Projectile Class here */
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class AThrowableActor> ThrowableProjectileClass;
@@ -36,6 +40,9 @@ protected:
 	/** This radius will be used for the Path Prediction*/
 	UPROPERTY(EditDefaultsOnly)
 	float ProjectileRadius;
+
+	UPROPERTY(EditDefaultsOnly)
+	UMaterial* CrosshairDecal;
 
 	// Manage Aiming
 	void AimPressed();

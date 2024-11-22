@@ -11,20 +11,17 @@
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
 #include "Component/InteractionComponent.h"
-#include "AbilitySystemComponent.h"
 #include "AttributeSet/BaseAttributeSet.h"
 #include "GameplayAbilities/DashAbility.h"
 #include "GameplayAbilities/ThrowGameplayAbility.h"
+#include "Widget/PlayerHUDWidget.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
 // AAnan_ProgrammingTestCharacter
 
-UAbilitySystemComponent* AAnan_ProgrammingTestCharacter::GetAbilitySystemComponent() const
-{
-	return AbilitySystemComponent;
-}
+
 
 AAnan_ProgrammingTestCharacter::AAnan_ProgrammingTestCharacter()
 {
@@ -48,8 +45,6 @@ AAnan_ProgrammingTestCharacter::AAnan_ProgrammingTestCharacter()
 	// Create an InteractionComponent
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 
-	// Create an Ability System Component
-	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -67,22 +62,26 @@ void AAnan_ProgrammingTestCharacter::NotifyControllerChanged()
 		}
 	}
 
-	// Add a new base attribute set to the Ability System Component, if there isn't one
+}
+
+
+
+void AAnan_ProgrammingTestCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
 	if (AbilitySystemComponent)
 	{
-		PlayerAttributeSet = AbilitySystemComponent->GetSet<UBaseAttributeSet>();
-		
-		if (!PlayerAttributeSet)
-		{
-			PlayerAttributeSet = AbilitySystemComponent->AddSet<UBaseAttributeSet>();
-		}
-
 		// Giving All Gameplay Abilities stored in the "StartingGameplayAbilities" Array to the Player
 		for (int i = 0; i < StartingGameplayAbilities.Num(); i++)
 		{
 			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartingGameplayAbilities[i]));
 		}
 	}
+
+	
+	PlayerHUD = CreateWidget<UPlayerHUDWidget>(Cast<APlayerController>(GetController()),PlayerHUDWidget);
+	PlayerHUD->AddToViewport();
 }
 
 void AAnan_ProgrammingTestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -105,6 +104,12 @@ void AAnan_ProgrammingTestCharacter::SetupPlayerInputComponent(UInputComponent* 
 
 		//Molotov 
 		EnhancedInputComponent->BindAction(MolotovInputAction, ETriggerEvent::Triggered, this, &AAnan_ProgrammingTestCharacter::Molotov);
+
+		//SmokeGrenade 
+		EnhancedInputComponent->BindAction(SmokeGrenadeInputAction, ETriggerEvent::Triggered, this, &AAnan_ProgrammingTestCharacter::SmokeGrenade);
+
+		//Melee
+		EnhancedInputComponent->BindAction(MeleeInputAction, ETriggerEvent::Triggered, this, &AAnan_ProgrammingTestCharacter::Melee);
 	}
 	else
 	{
@@ -152,3 +157,13 @@ void AAnan_ProgrammingTestCharacter::Molotov()
 	AbilitySystemComponent->TryActivateAbilityByClass(MolotovAbility.Get());
 }
 
+void AAnan_ProgrammingTestCharacter::SmokeGrenade()
+{
+	AbilitySystemComponent->TryActivateAbilityByClass(SmokeGrenadeAbility.Get());
+}
+
+void AAnan_ProgrammingTestCharacter::Melee()
+{
+	AbilitySystemComponent->CancelAbilityHandle(AbilitySystemComponent->FindAbilitySpecFromClass(MolotovAbility)->Handle);
+	AbilitySystemComponent->CancelAbilityHandle(AbilitySystemComponent->FindAbilitySpecFromClass(SmokeGrenadeAbility)->Handle);
+}

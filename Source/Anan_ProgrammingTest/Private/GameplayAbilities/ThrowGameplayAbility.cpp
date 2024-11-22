@@ -9,6 +9,10 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "AbilityTasks/ThrowableAimPredictionTask.h"
 #include "Actor/ThrowableActor.h"
+#include "Widget/PlayerHUDWidget.h"
+#include "Gun/GravityGun.h"
+#include "Components/DecalComponent.h"
+#include "Component/QuestManagerComponent.h"
 
 
 
@@ -33,6 +37,15 @@ void UThrowGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Han
 		return;
 	}
 
+	Player->PlayerHUD->OnWeaponChanged(WeaponName);
+
+	if (Player->CurrentGun)
+	{
+		Player->CurrentGun->Unequip();
+	}
+
+	
+
 	// Get Mapping Context and Input Actions from the Player
 	// Set Throwable Input Mapping Context with Priority 2
 
@@ -49,20 +62,53 @@ void UThrowGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, 
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
+	if (Task)
+	{
+		Task->TargetDecalComponent->DestroyComponent();
+		Task->EndTask();
+	}
+	
+	FString NewWeaponName = (Player->CurrentGun) ? "gravitygun" : "hand";
+
+	Player->PlayerHUD->OnWeaponChanged(NewWeaponName);
+
+	if (Player->CurrentGun)
+	{
+		Player->CurrentGun->Equip();
+	}
+	
+
+
+
 	SubSystem->RemoveMappingContext(Player->ThrowableMappingContext);
 
 	InputComp->ClearBindingsForObject(this);
+
+	InputComp->BindAction(Player->AimAction, ETriggerEvent::Completed, this, &UThrowGameplayAbility::AimReleased);
+
 }
 
 void UThrowGameplayAbility::AimPressed()
 {
-	Task = UThrowableAimPredictionTask::ThrowableAimPrediction(this, ThrowVelocity, ProjectileRadius,Player->ThrowStartOffset);
+	Task = UThrowableAimPredictionTask::ThrowableAimPrediction(this, ThrowVelocity, ProjectileRadius,Player->ThrowStartOffset, CrosshairDecal);
 	Task->ReadyForActivation();
+
+	UQuestManagerComponent* QuestManager = Player->GetComponentByClass<UQuestManagerComponent>();
+
+	if (QuestManager)
+	{
+		QuestManager->ObjectiveCompleted(WeaponName + "aim");
+	}
 }
 
 void UThrowGameplayAbility::AimReleased()
 {
-	Task->EndTask();
+	if (Task)
+	{
+		Task->TargetDecalComponent->DestroyComponent();
+		Task->EndTask();
+	}
+
 }
 
 void UThrowGameplayAbility::Throw()
@@ -90,6 +136,16 @@ void UThrowGameplayAbility::Throw()
 		UGameplayStatics::FinishSpawningActor(SpawnedActor, FTransform(SpawnRotation, StartLocation, FVector(1, 1, 1)));
 	}
 
+	UQuestManagerComponent* QuestManager = Player->GetComponentByClass<UQuestManagerComponent>();
+
+	if (QuestManager)
+	{
+		QuestManager->ObjectiveCompleted(WeaponName + "throw");
+	}
+
 	CommitAbilityCooldown(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false);
+
+	Player->PlayerHUD->CooldownValues(this, WeaponName);
+
 	EndAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, false, false);
 }

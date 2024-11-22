@@ -4,6 +4,9 @@
 #include "GameplayAbilities/DashAbility.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Anan_ProgrammingTest/Anan_ProgrammingTestCharacter.h"
+#include "Widget/PlayerHUDWidget.h"
+#include "AbilitySystemComponent.h"
+#include "Component/QuestManagerComponent.h"
 
 UDashAbility::UDashAbility(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -19,6 +22,12 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 
 	CooldownGameplayEffectClass = Player->DashCooldownClass;
 
+	UQuestManagerComponent* QuestManager = Player->GetComponentByClass<UQuestManagerComponent>();
+
+	if (QuestManager)
+	{
+		QuestManager->ObjectiveCompleted("dash");
+	}
 
 	// Check are we already on a Cooldown
 
@@ -28,6 +37,12 @@ void UDashAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, cons
 		return;
 	}
 
+	FGameplayTagContainer GameplayEffectsToRemove;
+	GameplayEffectsToRemove.AddTag(FGameplayTag::RequestGameplayTag("GameplayEffects.Character.FireDamage"));
+
+	GetAbilitySystemComponentFromActorInfo()->RemoveActiveEffectsWithAppliedTags(GameplayEffectsToRemove);
+
+	Player->PlayerHUD->CooldownValues(this, "dash");
 
 	//Get Player Input Values from the Player Character and Calculate the direction and apply it to the Velocity of Character Movement Component
 

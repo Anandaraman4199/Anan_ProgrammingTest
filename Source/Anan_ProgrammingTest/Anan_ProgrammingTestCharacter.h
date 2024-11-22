@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "AbilitySystemInterface.h"
+#include "Actor/BaseCharacter.h"
 #include "Anan_ProgrammingTestCharacter.generated.h"
 
 class UInputComponent;
@@ -18,10 +18,9 @@ struct FInputActionValue;
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AAnan_ProgrammingTestCharacter : public ACharacter, public IAbilitySystemInterface
+class AAnan_ProgrammingTestCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
-
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Mesh, meta = (AllowPrivateAccess = "true"))
@@ -59,15 +58,26 @@ class AAnan_ProgrammingTestCharacter : public ACharacter, public IAbilitySystemI
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwables|Molotov", meta = (AllowPrivateAccess = "true"))
 	UInputAction* MolotovInputAction;
 
+	/** Smoke Grenade ability*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwables|SmokeGrenade", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UThrowGameplayAbility> SmokeGrenadeAbility;
 
+	/** Smoke Grenade Input Action*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Throwables|SmokeGrenade", meta = (AllowPrivateAccess = "true"))
+	UInputAction* SmokeGrenadeInputAction;
+
+	/** Melee or Gun Input Action*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input|Default", meta = (AllowPrivateAccess = "true"))
+	UInputAction* MeleeInputAction;
+
+	/** Player HUD Widget*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widget", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UUserWidget> PlayerHUDWidget;
 
 	/** Provide all the Default Gameplay Abilities in this array*/
 	UPROPERTY(EditDefaultsOnly, Category = "AbilitySystemComponent|GameplayAbilities", meta = (AllowPrivateAccess = "true"))
 	TArray<TSubclassOf<class UGameplayAbility>> StartingGameplayAbilities;
 
-	/** Ability System Interface Function
-		Returns Ability System Component of this Actor */
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const;
 
 public:
 	AAnan_ProgrammingTestCharacter();
@@ -85,6 +95,12 @@ protected:
 	/** Called when switching to Molotov input */
 	void Molotov();
 
+	/** Called when switching to SmokeGrenade input */
+	void SmokeGrenade();
+
+
+	void BeginPlay() override;
+
 protected:
 	
 	// APawn interface
@@ -92,11 +108,11 @@ protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
 
-	/** Ability System Component*/
-	UPROPERTY(EditDefaultsOnly)
-	class UAbilitySystemComponent* AbilitySystemComponent;
 
 public:
+
+	class AGravityGun* CurrentGun;
+
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
@@ -109,10 +125,6 @@ public:
 	/** Interaction Component which takes care of Look At and Interact Functions*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AdditionalComponents)
 	class UInteractionComponent* InteractionComponent;
-
-	/** Base Attribute Set stores the Stats of the Player*/
-	UPROPERTY(BlueprintReadOnly, Category = "AbilitySystemComponent|AttributeSet")
-	const class UBaseAttributeSet* PlayerAttributeSet;
 
 	/** Store Player Move Input Values*/
 	UPROPERTY(BlueprintReadOnly, Category = "InputValues")
@@ -139,8 +151,15 @@ public:
 	UInputAction* ThrowAction;
 
 	/** Throwables items Throw Start Offset*/
-	UPROPERTY(EditDefaultsOnly, Category = "Throwables", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Throwables")
 	FVector ThrowStartOffset;
+
+	/** Holds reference to current Player HUD Widget*/
+	UPROPERTY(BlueprintReadOnly, Category = "Widget")
+	class UPlayerHUDWidget* PlayerHUD;
+
+	/** Called when switching to Melee input */
+	void Melee();
 
 };
 

@@ -29,6 +29,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Components)
 	class UProjectileMovementComponent* ProjectileMovementComp;
 
 };

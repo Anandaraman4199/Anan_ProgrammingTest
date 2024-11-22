@@ -52,6 +52,8 @@ class ANAN_PROGRAMMINGTEST_API AGravityGun : public AActor, public IInteractionI
 	UPROPERTY(EditAnywhere, Category = "Initialize Variable", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* FireMontage;
 
+	class UQuestManagerComponent* QuestManager;
+
 
 public:	
 	// Sets default values for this actor's properties
@@ -68,6 +70,10 @@ public:
 	/** Physics Handle will take care of holding a physics actor in front of the player*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Components)
 	class UPhysicsHandleComponent* PhysicsHandleComponent;
+
+	void Equip();
+
+	void Unequip();
 
 protected:
 	// Called when the game starts or when spawned

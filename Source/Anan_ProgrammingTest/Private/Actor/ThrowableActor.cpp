@@ -31,6 +31,7 @@ void AThrowableActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	
 }
 
 // Called every frame

@@ -3,10 +3,13 @@
 
 #include "AbilityTasks/ThrowableAimPredictionTask.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/DecalComponent.h"
 
 void UThrowableAimPredictionTask::Activate()
 {
 	bTickingTask = true;
+
+	TargetDecalComponent = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), DecalMaterial, FVector(1, 1, 1), FVector(0, 0, 0));
 }
 
 void UThrowableAimPredictionTask::TickTask(float DeltaTime)
@@ -23,19 +26,17 @@ void UThrowableAimPredictionTask::TickTask(float DeltaTime)
 
 	UGameplayStatics::PredictProjectilePath(GetWorld(), PathParam, PathResult);
 
-	for (int i = 0; i < PathResult.PathData.Num(); i++)
-	{
-		DrawDebugSphere(GetWorld(), PathResult.PathData[i].Location, ProjectileRadius, 12, FColor::Green, false, -1);
-	}
+	TargetDecalComponent->SetWorldScale3D(FVector(75, 75, 75));
+	TargetDecalComponent->SetWorldLocationAndRotation(PathResult.HitResult.Location, PathResult.HitResult.Normal.Rotation());
 
-	DrawDebugSphere(GetWorld(), PathResult.HitResult.Location, ProjectileRadius, 12, FColor::Red, false, -1);
 }
 
-UThrowableAimPredictionTask* UThrowableAimPredictionTask::ThrowableAimPrediction(UGameplayAbility* OwningAbility, float ThrowVelocity, float ProjectileRadius, FVector StartOffset)
+UThrowableAimPredictionTask* UThrowableAimPredictionTask::ThrowableAimPrediction(UGameplayAbility* OwningAbility, float ThrowVelocity, float ProjectileRadius, FVector StartOffset, UMaterial* DecalMaterial)
 {
 	UThrowableAimPredictionTask* Task = NewAbilityTask<UThrowableAimPredictionTask>(OwningAbility);
 	Task->ThrowVelocity = ThrowVelocity;
 	Task->ProjectileRadius = ProjectileRadius;
 	Task->StartOffset = StartOffset;
+	Task->DecalMaterial = DecalMaterial;
 	return Task;
 }

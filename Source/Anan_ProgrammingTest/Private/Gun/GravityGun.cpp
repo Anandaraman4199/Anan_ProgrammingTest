@@ -11,6 +11,8 @@
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Blueprint/UserWidget.h"
+#include "Widget/PlayerHUDWidget.h"
+#include "Component/QuestManagerComponent.h"
 
 
 // Sets default values
@@ -33,6 +35,26 @@ AGravityGun::AGravityGun()
 
 }
 
+void AGravityGun::Equip()
+{
+	AAnan_ProgrammingTestCharacter* PlayerCharacter = Cast<AAnan_ProgrammingTestCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)); PlayerCharacter->HasRifle = true;
+
+	PlayerCharacter->HasRifle = true;
+	SetActorHiddenInGame(false);
+	
+
+}
+
+void AGravityGun::Unequip()
+{
+	AAnan_ProgrammingTestCharacter* PlayerCharacter = Cast<AAnan_ProgrammingTestCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)); PlayerCharacter->HasRifle = true;
+
+	PlayerCharacter->HasRifle = false;
+	SetActorHiddenInGame(true);
+
+	GrabRelease();
+}
+
 // Called when the game starts or when spawned
 void AGravityGun::BeginPlay()
 {
@@ -51,6 +73,12 @@ void AGravityGun::Interact_Implementation()
 {	
 
 	AAnan_ProgrammingTestCharacter* PlayerCharacter = Cast<AAnan_ProgrammingTestCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	QuestManager = PlayerCharacter->GetComponentByClass<UQuestManagerComponent>();
+
+	PlayerCharacter->CurrentGun = this;
+
+	PlayerCharacter->Melee();
 
 	// Attach to the Player Character Mesh
 	SkeletalMeshComponent->AttachToComponent(PlayerCharacter->GetMesh1P(), FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), FName(TEXT("GripPoint")));
@@ -77,6 +105,14 @@ void AGravityGun::Interact_Implementation()
 
 	UUserWidget* TutorialWidget = CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), GravityGunTutorialWidgetClass);
 	TutorialWidget->AddToViewport(1);
+
+	PlayerCharacter->PlayerHUD->OnWeaponChanged("gravitygun");
+
+	
+	if (QuestManager)
+	{
+		QuestManager->ObjectiveCompleted("pickup");
+	}
 }
 
 // Called every frame
@@ -112,6 +148,8 @@ void AGravityGun::Grab()
 		{
 			PhysicsHandleComponent->GrabComponentAtLocationWithRotation(OutHit.Component.Get(), NAME_None, OutHit.Component->GetComponentLocation(), OutHit.Component->GetComponentRotation());
 			bIsGrabbing = true;
+
+			QuestManager->ObjectiveCompleted("grab");
 		}
 	}
 }
@@ -141,6 +179,8 @@ void AGravityGun::Throw()
 
 	if (GrabbedComponent)
 	{
+		QuestManager->ObjectiveCompleted("throw");
+
 		// Release the physics handle
 		PhysicsHandleComponent->ReleaseComponent();
 
@@ -151,10 +191,12 @@ void AGravityGun::Throw()
 		// Add impulse in the forward vector of the camera
 		Cast<UPrimitiveComponent>(GrabbedComponent)->AddImpulseAtLocation((UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector() * ThrowForce),
 			GrabbedComponent->GetComponentLocation());
+		
 	}	
 	else
 	{
 		Shoot();
+		QuestManager->ObjectiveCompleted("shoot");
 	}
 
 	// Plays Fire Animation Montage for the Player Mesh
